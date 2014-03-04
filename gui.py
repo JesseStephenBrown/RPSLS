@@ -24,7 +24,7 @@ class Application(tk.Frame):
 		self.player1var.set(playerList[0])
 		self.player2var = tk.StringVar()
 		self.player2var.set(playerList[0])
-		
+		 
 		self.player1option = tk.OptionMenu(self, self.player1var, *playerList)
 		self.player1option.grid(row=1, column=0)
 

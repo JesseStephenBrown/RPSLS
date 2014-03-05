@@ -18,6 +18,7 @@ class Application(tk.Frame):
         self.playerTwoLabel = tk.Label(self, text='Player Two')
         self.playerTwoLabel.grid(row=0, column=4)
 
+        # List of potential players
         playerList = ('Human', 'StupidBot', 'RandomBot', 'IterativeBot', 'LastPlayBot', 'MyBot')
         
         self.player1var = tk.StringVar()

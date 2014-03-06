@@ -1,5 +1,6 @@
 import wx
 import random
+import os
 
 playerOptions = ['Human', 'StupidBot', 'RandomBot', 'IterativeBot', 'LastPlayBot', 'MyBot']
 numRounds = 5
@@ -183,7 +184,7 @@ class App(wx.App):
 
     def OnInit(self):
         self.view = View()
-        self.view.Show()
+        self.controller = Controller(self.view)
         self.SetTopWindow(self.view)
         return True
 
@@ -191,9 +192,13 @@ class View(wx.Frame):
 
     def __init__(self):
         wx.Frame.__init__(self, None, -1, title="Rock Paper Scissors, Lizard, Spock", size=(100,100), pos=(100,100), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
-        self.buildWidgets();
+        self.buildWidgets()
 
     def buildWidgets(self):
+
+        img_path = os.path.abspath("./background.gif")
+        self.SetIcon(wx.Icon(img_path, wx.BITMAP_TYPE_GIF))
+
         sizer = wx.GridBagSizer()
 
         self.player1Label = wx.StaticText(self, -1, "Player One: ")
@@ -223,11 +228,14 @@ class View(wx.Frame):
 
 class Controller:
 
-    def __init__(self):
-        pass
+    def __init__(self, view):
+        self._game = Game()
+        self._view = view
 
     def validateOptions(self, player1, player2):
-        pass
+        if player1 == "Human" and player2 == "Human":
+            return False
+        return True
 
     def choosePlayer(self, event):
         pass

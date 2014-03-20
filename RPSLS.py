@@ -13,26 +13,27 @@ class Element:
         if self.name() == opponent.name():
             return (self.name() + ' equals ' + opponent.name(), 'Tie')
         return {
+            #gives all the possible outcomes for Rock being first
             ('Rock', 'Paper') : ('Paper covers Rock', 'Lose'),
             ('Rock', 'Scissors') : ('Rock crushes Scissors', 'Win'),
             ('Rock', 'Lizard') : ('Rock crushes Lizard', 'Win'),
             ('Rock', 'Spock') : ('Spock vaporizes Rock', 'Lose'),
-
+            #gives all the possible outcomes for Paper being first
             ('Paper', 'Rock') : ('Paper covers Rock', 'Win'),
             ('Paper', 'Scissors') : ('Scissors cuts Paper', 'Lose'),
             ('Paper', 'Lizard') : ('Lizard eats Paper', 'Lose'),
             ('Paper', 'Spock') : ('Paper disproves Spock', 'Win'),
-            
+            #gives all the possible outcomes for Scissors being first
             ('Scissors', 'Rock') : ('Rock crushes Scissors', 'Lose'),
             ('Scissors', 'Paper') : ('Scissors cuts Paper', 'Win'),
             ('Scissors', 'Lizard') : ('Scissors decapitates Lizard', 'Win'),            
             ('Scissors', 'Spock') : ('Spock smashes Scissors', 'Lose'),
-
+            #gives all the possible outcomes for Lizard being first
             ('Lizard', 'Rock') : ('Rock crushes Lizard', 'Lose'),
             ('Lizard', 'Paper') : ('Lizard eats Paper', 'Win'),
             ('Lizard', 'Scissors') : ('Scissors decapitates Lizard', 'Lose'),
             ('Lizard', 'Spock') : ('Lizard poisons Spock', 'Win'),
-
+            #gives all the possible outcomes for Spock being first
             ('Spock', 'Rock') : ('Spock vaporizes Rock', 'Win'),
             ('Spock', 'Paper') : ('Paper disproves Spock', 'Lose'),
             ('Spock', 'Scissors') : ('Spock smashes Scissors', 'Win'),

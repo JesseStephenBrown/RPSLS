@@ -72,7 +72,7 @@ class Game:
         self._player1score = 0
         self._player2score = 0
 
-    def play(self):
+    def getPlayerMoves(self):
         p1move, p2move = self._player1.play(), self._player2.play()
         if isinstance(self._player1, LastPlayBot):
             self._player1.rememberLast(p2move)
@@ -183,8 +183,10 @@ class App(wx.App):
         wx.App.__init__(self)
 
     def OnInit(self):
+    	self.game = Game()
         self.view = View()
-        self.controller = Controller(self.view)
+        self.controller = Controller(self.view, self.game)
+        self.view.setController(controller)
         self.SetTopWindow(self.view)
         return True
 
@@ -206,6 +208,7 @@ class View(wx.Frame):
 
         self.player1choice = wx.Choice(self, -1, choices=playerOptions)
         sizer.Add(self.player1choice, (1, 0), (1,1), wx.EXPAND)
+        self.Bind(self.player1choice, controller.choosePlayerOne)
 
         self.player2Label = wx.StaticText(self, -1, "Player Two: ")
         sizer.Add(self.player2Label, (0,4), (1,1))
@@ -226,18 +229,31 @@ class View(wx.Frame):
         self.SetSizerAndFit(sizer)
         self.Show(True)
 
+    def setController(self, controller):
+    	"""setController saves an instance of Controller to instance variable controller, or returns a type error is controller is not a Controller"""
+    	if isinstance(controller, Controller)
+    		self.controller = controller
+    	else
+    		raise TypeError("Requires instance of Controller, not instance of " + controller.__class__.__name__)
+
+    def toggleStartButton(self):
+    	"""toggleStartButton toggles the state between disabled and enabled"""
+    	
+
 class Controller:
 
-    def __init__(self, view):
-        self._game = Game()
+    def __init__(self, view, game):
+        self._game = game
         self._view = view
 
     def validateOptions(self, player1, player2):
+        if player1 == None or player2 == None:
+        	return False
         if player1 == "Human" and player2 == "Human":
             return False
         return True
 
-    def choosePlayer(self, event):
+    def choosePlayerOne(self, event):
         pass
 
     def chooseMove(self, event):
@@ -247,43 +263,42 @@ if __name__ == '__main__':
     app = App()
     app.MainLoop()
 
-# if __name__ == '__main__':
-#     print len(playerOptions)
-#     print('Welcome to Rock, Paper, Scissors, Lizard, Spock, implemented by Tabetha Boushey and Jesse Brown\n')
+if __name__ == '__main__':
+    print('Welcome to Rock, Paper, Scissors, Lizard, Spock, implemented by Tabetha Boushey and Jesse Brown\n')
 
-#     game = Game()
+    game = Game()
 
-#     print('Please choose two players:')
-#     for i in range(1, len(playerOptions) + 1):
-#         print('\t(' + str(i) + ') ' + playerOptions[i-1])
-#     print('')
+    print('Please choose two players:')
+    for i in range(1, len(playerOptions) + 1):
+        print('\t(' + str(i) + ') ' + playerOptions[i-1])
+    print('')
 
-#     selection = input("Select Player 1: ")
-#     while not game.choosePlayer(1, selection):
-#         print("Invalid selection. Please try again.")
-#         selection = input("Select Player 1: ")
+    selection = input("Select Player 1: ")
+    while not game.choosePlayer(1, selection):
+        print("Invalid selection. Please try again.")
+        selection = input("Select Player 1: ")
 
-#     selection = input("Select Player 2: ")
-#     while not game.choosePlayer(2, selection):
-#         print("Invalid selection. Please try again.")
-#         selection = input("Select Player 2: ")
+    selection = input("Select Player 2: ")
+    while not game.choosePlayer(2, selection):
+        print("Invalid selection. Please try again.")
+        selection = input("Select Player 2: ")
 
-#     print '\n' + game.getplayer1().name() + ' versus ' + game.getplayer2().name() + '. Go!\n'
+    print '\n' + game.getplayer1().name() + ' versus ' + game.getplayer2().name() + '. Go!\n'
 
-#     for roundNum in range(1, numRounds + 1):
-#         print('Round ' + str(roundNum) + ':')
-#         p1move, p2move = game.play()
-#         print('Player 1 chose ' + p1move.name())
-#         print('Player 2 chose ' + p2move.name())
-#         action, outcome = game.playRound(p1move, p2move)
-#         print(action)
-#         if outcome == 'Win':
-#             print('Player 1 won the round\n')
-#         elif outcome == 'Lose':
-#             print('Player 2 won the round\n')
-#         else:
-#             print('Round was a tie\n')
+    for roundNum in range(1, numRounds + 1):
+        print('Round ' + str(roundNum) + ':')
+        p1move, p2move = game.getPlayerMoves()
+        print('Player 1 chose ' + p1move.name())
+        print('Player 2 chose ' + p2move.name())
+        action, outcome = game.playRound(p1move, p2move)
+        print(action)
+        if outcome == 'Win':
+            print('Player 1 won the round\n')
+        elif outcome == 'Lose':
+            print('Player 2 won the round\n')
+        else:
+            print('Round was a tie\n')
 
-#     print('\nThe score is ' + str(game.getPlayer1Score()) + ' to ' + str(game.getPlayer2Score()) + '.')
-#     print(game.getResultString())
-#     game.endGame()
+    print('\nThe score is ' + str(game.getPlayer1Score()) + ' to ' + str(game.getPlayer2Score()) + '.')
+    print(game.getResultString())
+    game.endGame()

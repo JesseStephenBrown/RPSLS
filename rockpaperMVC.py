@@ -3,22 +3,28 @@ import random
 import os
 
 playerOptions = ['Human', 'StupidBot', 'RandomBot', 'IterativeBot', 'LastPlayBot', 'MyBot']
+"""all the options of players there are"""
 numRounds = 5
+"""the number of rounds that can be played"""
 
 class Game:
 
     def __init__(self):
+    	"""initializes self for player 1 and 2"""
         self._player1 = None
         self._player2 = None
         self.resetScores()
 
     def getplayer1(self):
+    	"""gets player 1"""
         return self._player1
 
     def getplayer2(self):
+    	"""gets player 2"""
         return self._player2
 
     def choosePlayer(self, playerNum, playerSelection):
+    	"""chooses the player"""
         if playerSelection not in range(1, len(playerOptions) + 1):
             return False
         else:
@@ -34,15 +40,19 @@ class Game:
             return False
 
     def getScores(self):
+    	"""gets the score for each player"""
         return self._player1score, self._player2score
 
     def getPlayer1Score(self):
+    	"""gets the score for player 1"""
         return self._player1score
 
     def getPlayer2Score(self):
+    	"""gets the score for player 2"""
         return self._player2score    
 
     def playRound(self, player1move, player2move):
+    	"""plays the round"""
         action, outcome = player1move.compareTo(player2move)
         if outcome == 'Win':
             self.addScore(1)
@@ -52,12 +62,14 @@ class Game:
         return action, outcome
 
     def addScore(self, playerNum):
+    	"""adds to the score"""
         if playerNum == 1:
             self._player1score = self._player1score + 1
         elif playerNum == 2:
             self._player2score = self._player2score + 1
 
     def getResultString(self):
+    	"""tells you who one the game"""
         if self._player1score > self._player2score:
             return 'Player 1 won the game!'
         elif self._player1score < self._player2score:
@@ -66,13 +78,16 @@ class Game:
             return 'Game was a draw!'
 
     def endGame(self):
+    	"""end of the game"""
         self.resetScores()
 
     def resetScores(self):
+    	"""resets the score of each player"""
         self._player1score = 0
         self._player2score = 0
 
     def getPlayerMoves(self):
+    	"""get the moves for the player"""
         p1move, p2move = self._player1.play(), self._player2.play()
         if isinstance(self._player1, LastPlayBot):
             self._player1.rememberLast(p2move)
@@ -89,6 +104,7 @@ class Element:
     def name(self):
         return self._name
     def compareTo(self, opponent):
+    	"""compareTo compares this instance of an Element to another and returns an description string and outcome"""
         #all tie cases are handled the same
         if self.name() == opponent.name():
             return (self.name() + ' equals ' + opponent.name(), 'Tie')
@@ -136,14 +152,17 @@ class Player:
         raise NotImplementedError("Not yet implemented")
 
 class StupidBot(Player):
+	"""returns the first move"""
     def play(self):
         return moves[0]
 
 class RandomBot(Player):
+	"""randomly chooses the move"""
     def play(self):
         return random.choice(moves)
 
 class IterativeBot(Player):
+	"""iteratively chooses the next move"""
     _currentSelection = -1
     def play(self):
         self._currentSelection += 1
@@ -152,6 +171,7 @@ class IterativeBot(Player):
         return moves[self._currentSelection]
 
 class LastPlayBot(Player):
+	"""does the last play of the game"""
     _firstMove = True
     def play(self):
         if self._firstMove:
@@ -162,6 +182,7 @@ class LastPlayBot(Player):
         self._firstMove = False
 
 class Human(Player):
+	"""lets the human choose their move"""
     def play(self):
         for i in range(0, len(moves)):
             print('(' + str(i + 1) + ') : ' + moves[i].name())
@@ -191,13 +212,13 @@ class App(wx.App):
         return True
 
 class View(wx.Frame):
-
+	"""makes the frame of the GUI"""
     def __init__(self):
         wx.Frame.__init__(self, None, -1, title="Rock Paper Scissors, Lizard, Spock", size=(100,100), pos=(100,100), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         self.buildWidgets()
 
     def buildWidgets(self):
-
+    	"""builds the widgets used in the GUI"""
         img_path = os.path.abspath("./background.gif")
         self.SetIcon(wx.Icon(img_path, wx.BITMAP_TYPE_GIF))
 
@@ -238,7 +259,7 @@ class View(wx.Frame):
 
     def toggleStartButton(self):
     	"""toggleStartButton toggles the state between disabled and enabled"""
-    	
+
 
 class Controller:
 
@@ -263,42 +284,42 @@ if __name__ == '__main__':
     app = App()
     app.MainLoop()
 
-if __name__ == '__main__':
-    print('Welcome to Rock, Paper, Scissors, Lizard, Spock, implemented by Tabetha Boushey and Jesse Brown\n')
+# if __name__ == '__main__':
+#     print('Welcome to Rock, Paper, Scissors, Lizard, Spock, implemented by Tabetha Boushey and Jesse Brown\n')
 
-    game = Game()
+#     game = Game()
 
-    print('Please choose two players:')
-    for i in range(1, len(playerOptions) + 1):
-        print('\t(' + str(i) + ') ' + playerOptions[i-1])
-    print('')
+#     print('Please choose two players:')
+#     for i in range(1, len(playerOptions) + 1):
+#         print('\t(' + str(i) + ') ' + playerOptions[i-1])
+#     print('')
 
-    selection = input("Select Player 1: ")
-    while not game.choosePlayer(1, selection):
-        print("Invalid selection. Please try again.")
-        selection = input("Select Player 1: ")
+#     selection = input("Select Player 1: ")
+#     while not game.choosePlayer(1, selection):
+#         print("Invalid selection. Please try again.")
+#         selection = input("Select Player 1: ")
 
-    selection = input("Select Player 2: ")
-    while not game.choosePlayer(2, selection):
-        print("Invalid selection. Please try again.")
-        selection = input("Select Player 2: ")
+#     selection = input("Select Player 2: ")
+#     while not game.choosePlayer(2, selection):
+#         print("Invalid selection. Please try again.")
+#         selection = input("Select Player 2: ")
 
-    print '\n' + game.getplayer1().name() + ' versus ' + game.getplayer2().name() + '. Go!\n'
+#     print '\n' + game.getplayer1().name() + ' versus ' + game.getplayer2().name() + '. Go!\n'
 
-    for roundNum in range(1, numRounds + 1):
-        print('Round ' + str(roundNum) + ':')
-        p1move, p2move = game.getPlayerMoves()
-        print('Player 1 chose ' + p1move.name())
-        print('Player 2 chose ' + p2move.name())
-        action, outcome = game.playRound(p1move, p2move)
-        print(action)
-        if outcome == 'Win':
-            print('Player 1 won the round\n')
-        elif outcome == 'Lose':
-            print('Player 2 won the round\n')
-        else:
-            print('Round was a tie\n')
+#     for roundNum in range(1, numRounds + 1):
+#         print('Round ' + str(roundNum) + ':')
+#         p1move, p2move = game.getPlayerMoves()
+#         print('Player 1 chose ' + p1move.name())
+#         print('Player 2 chose ' + p2move.name())
+#         action, outcome = game.playRound(p1move, p2move)
+#         print(action)
+#         if outcome == 'Win':
+#             print('Player 1 won the round\n')
+#         elif outcome == 'Lose':
+#             print('Player 2 won the round\n')
+#         else:
+#             print('Round was a tie\n')
 
-    print('\nThe score is ' + str(game.getPlayer1Score()) + ' to ' + str(game.getPlayer2Score()) + '.')
-    print(game.getResultString())
-    game.endGame()
+#     print('\nThe score is ' + str(game.getPlayer1Score()) + ' to ' + str(game.getPlayer2Score()) + '.')
+#     print(game.getResultString())
+#     game.endGame()

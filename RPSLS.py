@@ -49,6 +49,7 @@ spock = Element('Spock')
 moves = [rock, paper, scissors, lizard, spock]
 
 class Player:
+    #creates the player
     """Player represents a player of the game"""
     def __init__(self, name):
         self._name = name
@@ -58,14 +59,17 @@ class Player:
         raise NotImplementedError("Not yet implemented")
 
 class StupidBot(Player):
+    #creates the stupid bot
     def play(self):
         return moves[0]
 
 class RandomBot(Player):
+    #creates the random bot
     def play(self):
         return random.choice(moves)
 
 class IterativeBot(Player):
+    #creates the iterative bot
     _currentSelection = -1
     def play(self):
         self._currentSelection += 1
@@ -74,6 +78,7 @@ class IterativeBot(Player):
         return moves[self._currentSelection]
 
 class LastPlayBot(Player):
+    # creates the last play bot
     _firstMove = True
     def play(self):
         if self._firstMove:

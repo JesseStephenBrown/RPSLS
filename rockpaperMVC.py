@@ -3,22 +3,28 @@ import random
 import os
 
 playerOptions = ['Human', 'StupidBot', 'RandomBot', 'IterativeBot', 'LastPlayBot', 'MyBot']
+"""all the options of players there are"""
 numRounds = 5
+"""the number of rounds that can be played"""
 
 class Game:
-
+   
     def __init__(self):
+        """initializes self for player 1 and 2"""
         self._player1 = None
         self._player2 = None
         self.resetScores()
-
+    
     def getplayer1(self):
+        """gets player 1"""
         return self._player1
-
+    
     def getplayer2(self):
+        """gets player 2"""
         return self._player2
-
+   
     def choosePlayer(self, playerNum, playerSelection):
+         """chooses the player"""
         if playerSelection not in range(1, len(playerOptions) + 1):
             return False
         else:
@@ -32,17 +38,21 @@ class Game:
             return True
         else:
             return False
-
+    
     def getScores(self):
+        """gets the score for each player"""
         return self._player1score, self._player2score
-
+        
     def getPlayer1Score(self):
+        """gets the score for player 1"""
         return self._player1score
-
+        
     def getPlayer2Score(self):
+        """gets the score for player 1"""
         return self._player2score    
-
+    
     def playRound(self, player1move, player2move):
+        """plays the round"""
         action, outcome = player1move.compareTo(player2move)
         if outcome == 'Win':
             self.addScore(1)
@@ -50,29 +60,34 @@ class Game:
             self.addScore(2)
 
         return action, outcome
-
+    
     def addScore(self, playerNum):
+        """adds to the score"""
         if playerNum == 1:
             self._player1score = self._player1score + 1
         elif playerNum == 2:
             self._player2score = self._player2score + 1
-
+    
     def getResultString(self):
+        """tells you who one the game"""
         if self._player1score > self._player2score:
             return 'Player 1 won the game!'
         elif self._player1score < self._player2score:
             return 'Player 2 won the game!'
         else:
             return 'Game was a draw!'
-
+    
     def endGame(self):
+        """end of the game"""
         self.resetScores()
 
     def resetScores(self):
+        """resets the score of each player"""
         self._player1score = 0
         self._player2score = 0
 
     def play(self):
+        """get the moves for the player"""
         p1move, p2move = self._player1.play(), self._player2.play()
         if isinstance(self._player1, LastPlayBot):
             self._player1.rememberLast(p2move)
@@ -84,35 +99,45 @@ class Element:
     """Element is a representation of a Rock-Paper-Scissors-Lizard-Spock weapon choice"""
     def __init__(self, name):
         self._name = name
+        
     def __str__(self):
+        """returns the string of self"""
         return self.name()
+        
     def name(self):
+        """returns the name"""
         return self._name
+        
     def compareTo(self, opponent):
-        #all tie cases are handled the same
+        """all tie cases are handled the same"""
         if self.name() == opponent.name():
             return (self.name() + ' equals ' + opponent.name(), 'Tie')
         return {
+            """gives all possible outcomes for Rock"""
             ('Rock', 'Paper') : ('Paper covers Rock', 'Lose'),
             ('Rock', 'Scissors') : ('Rock crushes Scissors', 'Win'),
             ('Rock', 'Lizard') : ('Rock crushes Lizard', 'Win'),
             ('Rock', 'Spock') : ('Spock vaporizes Rock', 'Lose'),
-
+            
+            """gives all possible outcomes for Paper"""
             ('Paper', 'Rock') : ('Paper covers Rock', 'Win'),
             ('Paper', 'Scissors') : ('Scissors cuts Paper', 'Lose'),
             ('Paper', 'Lizard') : ('Lizard eats Paper', 'Lose'),
             ('Paper', 'Spock') : ('Paper disproves Spock', 'Win'),
             
+            """gives all possible outcomes for Scissors"""
             ('Scissors', 'Rock') : ('Rock crushes Scissors', 'Lose'),
             ('Scissors', 'Paper') : ('Scissors cuts Paper', 'Win'),
             ('Scissors', 'Lizard') : ('Scissors decapitates Lizard', 'Win'),            
             ('Scissors', 'Spock') : ('Spock smashes Scissors', 'Lose'),
-
+            
+            """gives all possible outcomes for Lizard"""
             ('Lizard', 'Rock') : ('Rock crushes Lizard', 'Lose'),
             ('Lizard', 'Paper') : ('Lizard eats Paper', 'Win'),
             ('Lizard', 'Scissors') : ('Scissors decapitates Lizard', 'Lose'),
             ('Lizard', 'Spock') : ('Lizard poisons Spock', 'Win'),
-
+            
+            """gives all possible outcomes for Spock"""
             ('Spock', 'Rock') : ('Spock vaporizes Rock', 'Win'),
             ('Spock', 'Paper') : ('Paper disproves Spock', 'Lose'),
             ('Spock', 'Scissors') : ('Spock smashes Scissors', 'Win'),
@@ -130,20 +155,25 @@ class Player:
     """Player represents a player of the game"""
     def __init__(self, name):
         self._name = name
+        
     def name(self):
         return self._name
+        
     def play(self):
         raise NotImplementedError("Not yet implemented")
 
 class StupidBot(Player):
+    """returns the first move"""
     def play(self):
         return moves[0]
 
 class RandomBot(Player):
+    """randomly chooses the move"""
     def play(self):
         return random.choice(moves)
 
 class IterativeBot(Player):
+    """iteratively chooses the next move"""
     _currentSelection = -1
     def play(self):
         self._currentSelection += 1
@@ -152,6 +182,7 @@ class IterativeBot(Player):
         return moves[self._currentSelection]
 
 class LastPlayBot(Player):
+    """does the last play of the game"""
     _firstMove = True
     def play(self):
         if self._firstMove:
@@ -162,6 +193,7 @@ class LastPlayBot(Player):
         self._firstMove = False
 
 class Human(Player):
+    """lets the human choose their move"""
     def play(self):
         for i in range(0, len(moves)):
             print('(' + str(i + 1) + ') : ' + moves[i].name())
@@ -178,7 +210,6 @@ class MyBot(Player):
         return moves[0]
 
 class App(wx.App):
-
     def __init__(self):
         wx.App.__init__(self)
 
@@ -189,37 +220,37 @@ class App(wx.App):
         return True
 
 class View(wx.Frame):
-
+    """makes the frame of the GUI"""
     def __init__(self):
         wx.Frame.__init__(self, None, -1, title="Rock Paper Scissors, Lizard, Spock", size=(100,100), pos=(100,100), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         self.buildWidgets()
 
     def buildWidgets(self):
-
+        """buildes the widgets used in the GUI"""
         img_path = os.path.abspath("./background.gif")
         self.SetIcon(wx.Icon(img_path, wx.BITMAP_TYPE_GIF))
 
         sizer = wx.GridBagSizer()
-
+        """creates the label for player 1"""
         self.player1Label = wx.StaticText(self, -1, "Player One: ")
         sizer.Add(self.player1Label, (0,0), (1,1), wx.EXPAND)
-
+        """creates the choices for player 1"""
         self.player1choice = wx.Choice(self, -1, choices=playerOptions)
         sizer.Add(self.player1choice, (1, 0), (1,1), wx.EXPAND)
-
+        """creates the label for player 2"""
         self.player2Label = wx.StaticText(self, -1, "Player Two: ")
         sizer.Add(self.player2Label, (0,4), (1,1))
-
+        """creates the choices for player 2"""
         self.player2choice = wx.Choice(self, -1, choices=playerOptions)
         sizer.Add(self.player2choice, (1, 4), (1,1), wx.EXPAND)
-
+        """creates the start button"""
         self.startButton = wx.Button(self, -1, "Start the game!")
         sizer.Add(self.startButton, (1,2), (1,1,), wx.EXPAND)
-
+        """sets the background image"""
         self.background = wx.Image("background.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
         self.background = wx.StaticBitmap(self, -1, self.background)
         sizer.Add(self.background, (2,0), (1,5), wx.EXPAND)
-
+        """creates the status bar for scoring"""
         self.statusBar = wx.StatusBar(self, -1)
         sizer.Add(self.statusBar, (3,0), (1,5), wx.EXPAND)
 
@@ -227,7 +258,6 @@ class View(wx.Frame):
         self.Show(True)
 
 class Controller:
-
     def __init__(self, view):
         self._game = Game()
         self._view = view
@@ -236,10 +266,10 @@ class Controller:
         if player1 == "Human" and player2 == "Human":
             return False
         return True
-
+    """the player chooses their option"""
     def choosePlayer(self, event):
         pass
-
+    """the player chooses their move"""
     def chooseMove(self, event):
         pass
 
@@ -252,7 +282,7 @@ if __name__ == '__main__':
 #     print('Welcome to Rock, Paper, Scissors, Lizard, Spock, implemented by Tabetha Boushey and Jesse Brown\n')
 
 #     game = Game()
-
+#
 #     print('Please choose two players:')
 #     for i in range(1, len(playerOptions) + 1):
 #         print('\t(' + str(i) + ') ' + playerOptions[i-1])

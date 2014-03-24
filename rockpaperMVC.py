@@ -1,325 +1,238 @@
 import wx
+import wx.lib.statbmp
 import random
 import os
+import RPSLS
 
-playerOptions = ['Human', 'StupidBot', 'RandomBot', 'IterativeBot', 'LastPlayBot', 'MyBot']
-"""all the options of players there are"""
-numRounds = 5
-"""the number of rounds that can be played"""
+# magic numbers
+MIN = 0
+MAX = 1
+# these magic coords are based on drawing squares around the elements on the img,
+# so clicks just outside the circle will be considered a move
+SCISSORS_X = [208, 385]
+SCISSORS_Y = [27, 203]
+SPOCK_X = [22, 199]
+SPOCK_Y = [161, 340]
+LIZARD_X = [96, 274]
+LIZARD_Y = [399, 569]
+ROCK_X = [336, 510]
+ROCK_Y = [392, 565]
+PAPER_X = [402, 578]
+PAPER_Y = [158, 338]
+# Grid positions in (row, col)
+START_POS = (1, 2)
+BACKGROUND_POS = (2, 0)
+LABEL_BAR_POS = (3, 0)
+PLAYER_ONE_POS = (0, 0)
+PLAYER_TWO_POS = (0, 4)
+# Label status bar columns
+P1_SCORE_COL = 0
+P1_COL = 1
+GAME_TEXT_COL = 2
+P2_COL = 3
+P2_SCORE_COL = 4
+ROUND_COL = 5
 
-class Game:
-
-    def __init__(self):
-    	"""initializes self for player 1 and 2"""
-        self._player1 = None
-        self._player2 = None
-        self.resetScores()
-
-    def getplayer1(self):
-    	"""gets player 1"""
-        return self._player1
-
-    def getplayer2(self):
-    	"""gets player 2"""
-        return self._player2
-
-    def choosePlayer(self, playerNum, playerSelection):
-    	"""chooses the player"""
-        if playerSelection not in range(1, len(playerOptions) + 1):
-            return False
-        else:
-            player = eval(playerOptions[playerSelection-1] + '("' + playerOptions[playerSelection-1] + '")')
-
-        if playerNum == 1:
-            self._player1 = player
-            return True
-        elif playerNum == 2:
-            self._player2 = player
-            return True
-        else:
-            return False
-
-    def getScores(self):
-    	"""gets the score for each player"""
-        return self._player1score, self._player2score
-
-    def getPlayer1Score(self):
-    	"""gets the score for player 1"""
-        return self._player1score
-
-    def getPlayer2Score(self):
-    	"""gets the score for player 2"""
-        return self._player2score    
-
-    def playRound(self, player1move, player2move):
-    	"""plays the round"""
-        action, outcome = player1move.compareTo(player2move)
-        if outcome == 'Win':
-            self.addScore(1)
-        elif outcome == 'Lose':
-            self.addScore(2)
-
-        return action, outcome
-
-    def addScore(self, playerNum):
-    	"""adds to the score"""
-        if playerNum == 1:
-            self._player1score = self._player1score + 1
-        elif playerNum == 2:
-            self._player2score = self._player2score + 1
-
-    def getResultString(self):
-    	"""tells you who one the game"""
-        if self._player1score > self._player2score:
-            return 'Player 1 won the game!'
-        elif self._player1score < self._player2score:
-            return 'Player 2 won the game!'
-        else:
-            return 'Game was a draw!'
-
-    def endGame(self):
-    	"""end of the game"""
-        self.resetScores()
-
-    def resetScores(self):
-    	"""resets the score of each player"""
-        self._player1score = 0
-        self._player2score = 0
-
-    def getPlayerMoves(self):
-    	"""get the moves for the player"""
-        p1move, p2move = self._player1.play(), self._player2.play()
-        if isinstance(self._player1, LastPlayBot):
-            self._player1.rememberLast(p2move)
-        if isinstance(self._player2, LastPlayBot):
-            self._player2.rememberLast(p1move)
-        return p1move, p2move
-
-class Element:
-    """Element is a representation of a Rock-Paper-Scissors-Lizard-Spock weapon choice"""
-    def __init__(self, name):
-        self._name = name
-    def __str__(self):
-        return self.name()
-    def name(self):
-        return self._name
-    def compareTo(self, opponent):
-    	"""compareTo compares this instance of an Element to another and returns an description string and outcome"""
-        #all tie cases are handled the same
-        if self.name() == opponent.name():
-            return (self.name() + ' equals ' + opponent.name(), 'Tie')
-        return {
-            ('Rock', 'Paper') : ('Paper covers Rock', 'Lose'),
-            ('Rock', 'Scissors') : ('Rock crushes Scissors', 'Win'),
-            ('Rock', 'Lizard') : ('Rock crushes Lizard', 'Win'),
-            ('Rock', 'Spock') : ('Spock vaporizes Rock', 'Lose'),
-
-            ('Paper', 'Rock') : ('Paper covers Rock', 'Win'),
-            ('Paper', 'Scissors') : ('Scissors cuts Paper', 'Lose'),
-            ('Paper', 'Lizard') : ('Lizard eats Paper', 'Lose'),
-            ('Paper', 'Spock') : ('Paper disproves Spock', 'Win'),
-            
-            ('Scissors', 'Rock') : ('Rock crushes Scissors', 'Lose'),
-            ('Scissors', 'Paper') : ('Scissors cuts Paper', 'Win'),
-            ('Scissors', 'Lizard') : ('Scissors decapitates Lizard', 'Win'),            
-            ('Scissors', 'Spock') : ('Spock smashes Scissors', 'Lose'),
-
-            ('Lizard', 'Rock') : ('Rock crushes Lizard', 'Lose'),
-            ('Lizard', 'Paper') : ('Lizard eats Paper', 'Win'),
-            ('Lizard', 'Scissors') : ('Scissors decapitates Lizard', 'Lose'),
-            ('Lizard', 'Spock') : ('Lizard poisons Spock', 'Win'),
-
-            ('Spock', 'Rock') : ('Spock vaporizes Rock', 'Win'),
-            ('Spock', 'Paper') : ('Paper disproves Spock', 'Lose'),
-            ('Spock', 'Scissors') : ('Spock smashes Scissors', 'Win'),
-            ('Spock', 'Lizard') : ('Lizard poisons Spock', 'Lose'),
-        }[self.name(), opponent.name()]
-
-rock = Element('Rock')
-paper = Element('Paper')
-scissors = Element('Scissors')
-lizard = Element('Lizard')
-spock = Element('Spock')
-moves = [rock, paper, scissors, lizard, spock]
-
-class Player:
-    """Player represents a player of the game"""
-    def __init__(self, name):
-        self._name = name
-    def name(self):
-        return self._name
-    def play(self):
-        raise NotImplementedError("Not yet implemented")
-
-class StupidBot(Player):
-	"""returns the first move"""
-    def play(self):
-        return moves[0]
-
-class RandomBot(Player):
-	"""randomly chooses the move"""
-    def play(self):
-        return random.choice(moves)
-
-class IterativeBot(Player):
-	"""iteratively chooses the next move"""
-    _currentSelection = -1
-    def play(self):
-        self._currentSelection += 1
-        if self._currentSelection > len(moves) - 1:
-            self._currentSelection = 0
-        return moves[self._currentSelection]
-
-class LastPlayBot(Player):
-	"""does the last play of the game"""
-    _firstMove = True
-    def play(self):
-        if self._firstMove:
-            return random.choice(moves)
-        return self._lastElement
-    def rememberLast(self, element):
-        self._lastElement = element
-        self._firstMove = False
-
-class Human(Player):
-	"""lets the human choose their move"""
-    def play(self):
-        for i in range(0, len(moves)):
-            print('(' + str(i + 1) + ') : ' + moves[i].name())
-
-        selection = input("Enter your move: ")
-        while selection not in list(range(1, len(moves) + 1)):
-            print("Invalid move. Please try again.")
-            selection = input("Enter your move: ")
-                
-        return moves[selection - 1]
-
-class MyBot(Player):
-    def play(self):
-        return moves[0]
-
-class App(wx.App):
-
-    def __init__(self):
-        wx.App.__init__(self)
-
-    def OnInit(self):
-    	self.game = Game()
-        self.view = View()
-        self.controller = Controller(self.view, self.game)
-        self.view.setController(controller)
-        self.SetTopWindow(self.view)
-        return True
 
 class View(wx.Frame):
-	"""makes the frame of the GUI"""
+    """makes the frame of the GUI"""
     def __init__(self):
-        wx.Frame.__init__(self, None, -1, title="Rock Paper Scissors, Lizard, Spock", size=(100,100), pos=(100,100), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+        # Passes relevant data to super constructor. Position is upperleft corner of client screen, style is a bitmask with no drag-to-resize available
+        wx.Frame.__init__(self, None, -1, title="Rock Paper Scissors, Lizard, Spock", size=(100,100), pos=(0,0), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+        # View is actually a ViewController, so it needs an instance of game
+        self.game = RPSLS.Game()
         self.buildWidgets()
 
     def buildWidgets(self):
-    	"""builds the widgets used in the GUI"""
+        """builds the widgets used in the GUI"""
+        # Build the window icon on platforms that support window icons
         img_path = os.path.abspath("./background.gif")
         self.SetIcon(wx.Icon(img_path, wx.BITMAP_TYPE_GIF))
 
+        # Set the BG colour
+        self.SetBackgroundColour("White")
+
+        # establish a sizer - this holds/arranges all the components and is then added to the frame
         sizer = wx.GridBagSizer()
 
-        self.player1Label = wx.StaticText(self, -1, "Player One: ")
-        sizer.Add(self.player1Label, (0,0), (1,1), wx.EXPAND)
+        # build player labels and choices
+        self.buildPlayerSelections(sizer)
 
-        self.player1choice = wx.Choice(self, -1, choices=playerOptions)
-        sizer.Add(self.player1choice, (1, 0), (1,1), wx.EXPAND)
-        self.Bind(self.player1choice, controller.choosePlayerOne)
-
-        self.player2Label = wx.StaticText(self, -1, "Player Two: ")
-        sizer.Add(self.player2Label, (0,4), (1,1))
-
-        self.player2choice = wx.Choice(self, -1, choices=playerOptions)
-        sizer.Add(self.player2choice, (1, 4), (1,1), wx.EXPAND)
-
+        # build start button and Bind its event
         self.startButton = wx.Button(self, -1, "Start the game!")
-        sizer.Add(self.startButton, (1,2), (1,1,), wx.EXPAND)
+        sizer.Add(self.startButton, START_POS, (1,1,), wx.EXPAND)
+        self.startButton.Bind(wx.EVT_BUTTON, self.OnStartButton)
 
+        # build the play area image
         self.background = wx.Image("background.gif", wx.BITMAP_TYPE_GIF).ConvertToBitmap()
-        self.background = wx.StaticBitmap(self, -1, self.background)
-        sizer.Add(self.background, (2,0), (1,5), wx.EXPAND)
+        self.background = wx.lib.statbmp.GenStaticBitmap(self, -1, self.background)
+        sizer.Add(self.background, BACKGROUND_POS, (1,5), wx.EXPAND)
 
-        self.statusBar = wx.StatusBar(self, -1)
-        sizer.Add(self.statusBar, (3,0), (1,5), wx.EXPAND)
+        # build the upper status bar for status labels
+        self.labelStatusBar = wx.StatusBar(self, -1)
+        sizer.Add(self.labelStatusBar, LABEL_BAR_POS, (1,5), wx.EXPAND)
 
+        # build the lower status bar for data
+        self.statusBar = self.CreateStatusBar()
+
+        # layout the status bars
+        self.layoutStatusBars([self.labelStatusBar, self.statusBar])
+        self.populateLabelStatusBar(self.labelStatusBar)
+
+        # add sizer to frame and display
         self.SetSizerAndFit(sizer)
         self.Show(True)
 
-    def setController(self, controller):
-    	"""setController saves an instance of Controller to instance variable controller, or returns a type error is controller is not a Controller"""
-    	if isinstance(controller, Controller)
-    		self.controller = controller
-    	else
-    		raise TypeError("Requires instance of Controller, not instance of " + controller.__class__.__name__)
+    def OnStartButton(self, event):
+        """On start button checks to see if the player has made valid player selections, then starts the game"""
+        if self.validateOptions():
+            for each in self.choices:
+                each.Disable()
+            self.startButton.Disable()
+            self.labelStatusBar.SetStatusText('\n' + self.game.getplayer1().name() + ' vs ' + self.game.getplayer2().name() + '. Go!\n', GAME_TEXT_COL)
+            self.statusBar.SetStatusText(str(0), P1_SCORE_COL)
+            self.statusBar.SetStatusText(str(0), P2_SCORE_COL)
+            self.statusBar.SetStatusText(str(0), ROUND_COL)
 
-    def toggleStartButton(self):
-    	"""toggleStartButton toggles the state between disabled and enabled"""
+            # if neither player is human, round changing is handled by the next round button which takes over for the start button
+            if not self.game.getplayer1().name() == "Human" and not self.game.getplayer2().name() == "Human":
+                self.startButton.SetLabel("Next Round")
+                self.startButton.Bind(wx.EVT_BUTTON, self.OnNextRound)
+                self.startButton.Enable()
+            # if one of the players is human, round changing is handled by clicking a move
+            else:
+                # bind click events to the frame
+                self.background.Bind(wx.EVT_LEFT_DOWN, self.OnLeftClick)
 
 
-class Controller:
+    def OnNextRound(self, event):
+        """OnNextRound is an event handler bound only after successful player selection with non-human players"""
+        self.statusBar.SetStatusText(str(eval(self.statusBar.GetStatusText(5)) + 1), ROUND_COL)
+        if not isinstance(self.game.getplayer1(), RPSLS.Human) and not isinstance(self.game.getplayer2(), RPSLS.Human):
+            p1move, p2move = self.game.getPlayerMoves()
+            action, outcome = self.game.playRound(p1move, p2move)
+            self.displayOutcome(action, outcome)
 
-    def __init__(self, view, game):
-        self._game = game
-        self._view = view
+    def OnLeftClick(self, event):
+        """OnLeftClick is an event handler bound only after successful player selection with a human player"""
+        if self.game.getplayer1().name() == "Human":
+            # calculate p1's move
+            pos = event.GetPosition()
+            p1move = self.getMoveByCoord(pos)
+            # retrieve player 2's move
+            if p1move:
+                p2move = self.game.getplayer2().play()
+                if isinstance(self.game.getplayer2(), RPSLS.LastPlayBot):
+                    self.game.getplayer2().rememberLast(p1move)
+            else:
+                # if p1move not made successfully, p2move not made
+                p2move = None
+        else:
+            # calculate p2's move
+            pos = event.GetPosition()
+            p2move = self.getMoveByCoord(pos)
+            # retrieve player 1's move
+            if p2move:
+                p1move = self.game.getplayer1().play()
+                if isinstance(self.game.getplayer1(), RPSLS.LastPlayBot):
+                    self.game.getplayer1().rememberLast(p2move)
+            else:
+                # if p2move not made successfully, p1move not made
+                p1move = None
 
-    def validateOptions(self, player1, player2):
-        if player1 == None or player2 == None:
-        	return False
-        if player1 == "Human" and player2 == "Human":
+        if p1move and p2move:
+            # increment the round counter iff both plays have made their move
+            self.statusBar.SetStatusText(str(eval(self.statusBar.GetStatusText(5)) + 1), ROUND_COL)
+            action, outcome = self.game.playRound(p1move, p2move)
+            self.displayOutcome(action, outcome)
+
+    def OnPlayerOneSelection(self, event):
+        """OnPlayerOneSelection handles selection events on the player one choice by setting
+            the game instance's first player based on the selection made"""
+        self.game.choosePlayer(1, self.choices[0].GetCurrentSelection() + 1)
+        self.statusBar.SetStatusText(self.game.getplayer1().name(), P1_COL)
+
+    def OnPlayerTwoSelection(self, event):
+        """OnPlayerTwoSelection handles selection events on the player one choice by setting
+            the game instance's second player based on the selection made"""
+        self.game.choosePlayer(2, self.choices[1].GetCurrentSelection() + 1)
+        self.statusBar.SetStatusText(self.game.getplayer2().name(), P2_COL)
+
+    def getMoveByCoord(self, pos):
+        """getMoveByCoord is a helper method that returns the Element corresponding to click location (pos) or None"""
+        xPos, yPos = pos
+        if xPos > ROCK_X[MIN] and xPos < ROCK_X[MAX] and yPos > ROCK_Y[MIN] and yPos < ROCK_Y[MAX]:
+            return RPSLS.Element("Rock")
+        elif xPos > PAPER_X[MIN] and xPos < PAPER_X[MAX] and yPos > PAPER_Y[MIN] and yPos < PAPER_Y[MAX]:
+            return RPSLS.Element("Paper")
+        elif xPos > SCISSORS_X[MIN] and xPos < SCISSORS_X[MAX] and yPos > SCISSORS_Y[MIN] and yPos < SCISSORS_Y[MAX]:
+            return RPSLS.Element("Scissors")
+        elif xPos > LIZARD_X[MIN] and xPos < LIZARD_X[MAX] and yPos > LIZARD_Y[MIN] and yPos < LIZARD_Y[MAX]:
+            return RPSLS.Element("Lizard")
+        elif xPos > SPOCK_X[MIN] and xPos < SPOCK_X[MAX] and yPos > SPOCK_Y[MIN] and yPos < SPOCK_Y[MAX]:
+            return RPSLS.Element("Spock")
+        return None
+
+    def displayOutcome(self, action, outcome):
+        self.labelStatusBar.SetStatusText(action, GAME_TEXT_COL)
+        if outcome == "Win":
+            self.statusBar.SetStatusText("Player 1 wins!", GAME_TEXT_COL)
+            self.statusBar.SetStatusText(str(eval(self.statusBar.GetStatusText(0)) + 1), P1_SCORE_COL)
+        elif outcome == "Lose":
+            self.statusBar.SetStatusText("Player 2 wins!", GAME_TEXT_COL)
+            self.statusBar.SetStatusText(str(eval(self.statusBar.GetStatusText(4)) + 1), P2_SCORE_COL)
+        else:
+            self.statusBar.SetStatusText("It was a tie!", GAME_TEXT_COL)
+
+    def validateOptions(self):
+        """validateOptions returns True iff both players are selected and at least one is non-human"""
+        # If player 1 or player 2 has not been set:
+        if self.game.getplayer1() == None or self.game.getplayer2() == None:
             return False
+        # If player 1 is the same as player 2 and player 1 is human (which means player 2 is also)
+        if self.game.getplayer1().name() == self.game.getplayer2().name() and self.game.getplayer1().name() == "Human":
+            return False
+        # If neither of the above tests match, then the player options are both valid
         return True
 
-    def choosePlayerOne(self, event):
-        pass
+    def getPlayerData(self):
+        """getPlayerData is a convenience method used to store the label, start position, and size of the player label and choices"""
+        #        Player label   start  size
+        return (("Player One:", PLAYER_ONE_POS, (1,1)),
+                ("Player Two:", PLAYER_TWO_POS, (1,1)))
 
-    def chooseMove(self, event):
-        pass
+    def buildPlayerSelections(self, sizer):
+        """buildPlayerSelections builds the labels and choice boxes for player selection"""
+        self.choices = []
+        # iterate through the player data from the helper method, and build a label and choice box for each
+        for eachLabel, eachStart, eachSize in self.getPlayerData():
+            sizer.Add(wx.StaticText(self, -1, eachLabel), eachStart, eachSize, wx.EXPAND)
+            xStart, yStart = eachStart
+            self.choices.append(wx.Choice(self, -1, choices=RPSLS.playerOptions))
+            sizer.Add(self.choices[-1], (xStart+1, yStart), eachSize, wx.CENTER)
+        # bind the choice boxes to their respective selection events
+        self.choices[0].Bind(wx.EVT_CHOICE, self.OnPlayerOneSelection)
+        self.choices[1].Bind(wx.EVT_CHOICE, self.OnPlayerTwoSelection)
+
+    def layoutStatusBars(self, statusbars):
+        for each in statusbars:
+            each.SetFieldsCount(6)
+            each.SetStatusWidths([-1, -2, -4, -2, -1, -1])
+
+    def statusLabelData(self):
+        """statusLabelData is a convenience method used to store the label and column of the label status bar fields"""
+        return (("P1 Score", P1_SCORE_COL),
+                ("Player One", P1_COL),
+                ("Player Two", P2_COL),
+                ("P2 Score", P2_SCORE_COL),
+                ("Round", ROUND_COL))
+
+    def populateLabelStatusBar(self, bar):
+        """populateLabelStatusBar sets the labels on the labelStatusBar"""
+        for eachLabel, eachCol in self.statusLabelData():
+            bar.SetStatusText(eachLabel, eachCol)
 
 if __name__ == '__main__':
-    app = App()
+    app = wx.PySimpleApp()
+    frame = View()
     app.MainLoop()
-
-# if __name__ == '__main__':
-#     print('Welcome to Rock, Paper, Scissors, Lizard, Spock, implemented by Tabetha Boushey and Jesse Brown\n')
-
-#     game = Game()
-
-#     print('Please choose two players:')
-#     for i in range(1, len(playerOptions) + 1):
-#         print('\t(' + str(i) + ') ' + playerOptions[i-1])
-#     print('')
-
-#     selection = input("Select Player 1: ")
-#     while not game.choosePlayer(1, selection):
-#         print("Invalid selection. Please try again.")
-#         selection = input("Select Player 1: ")
-
-#     selection = input("Select Player 2: ")
-#     while not game.choosePlayer(2, selection):
-#         print("Invalid selection. Please try again.")
-#         selection = input("Select Player 2: ")
-
-#     print '\n' + game.getplayer1().name() + ' versus ' + game.getplayer2().name() + '. Go!\n'
-
-#     for roundNum in range(1, numRounds + 1):
-#         print('Round ' + str(roundNum) + ':')
-#         p1move, p2move = game.getPlayerMoves()
-#         print('Player 1 chose ' + p1move.name())
-#         print('Player 2 chose ' + p2move.name())
-#         action, outcome = game.playRound(p1move, p2move)
-#         print(action)
-#         if outcome == 'Win':
-#             print('Player 1 won the round\n')
-#         elif outcome == 'Lose':
-#             print('Player 2 won the round\n')
-#         else:
-#             print('Round was a tie\n')
-
-#     print('\nThe score is ' + str(game.getPlayer1Score()) + ' to ' + str(game.getPlayer2Score()) + '.')
-#     print(game.getResultString())
-#     game.endGame()
